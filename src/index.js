@@ -2,7 +2,7 @@ require('!style!css!sass!../app/sass/photon.scss')
 
 import React from 'react'
 import ReactDOM from 'react-dom'
-import {Router, Route, browserHistory} from 'react-router'
+import {Router, Route, hashHistory} from 'react-router'
 import {createStore} from 'redux'
 import {Provider} from 'react-redux'
 import {Main} from './components/Main'
@@ -22,12 +22,13 @@ const routes = <Route component={Main}>
   <Route path='/files' component={FilesContainer} />
   <Route path='/seeding' component={SeedContainer} />
   <Route path='/home' component={AccountContainer} />
+  <Route path='/public/:value' component={AccountContainer} />
 </Route>
 
 
 		ReactDOM.render(
 		  <Provider store={store}>
-		    <Router history={browserHistory}>{routes}</Router>
+		    <Router history={hashHistory}>{routes}</Router>
 		  </Provider>,
 		  document.getElementById('app')
 		)

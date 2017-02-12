@@ -4,7 +4,8 @@ import {Account} from '../components/Account'
 export const AccountContainer = React.createClass({
 	render: function() {
 		return (
-      <Account />
+      <Account 
+        params={this.props.params} />
 		)
 	}
 })

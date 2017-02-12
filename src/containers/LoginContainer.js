@@ -3,7 +3,7 @@ import React from 'react'
 import {Main} from '../components/Main'
 import {Dashboard} from '../components/Dashboard'
 import {api} from '../services'
-import { browserHistory } from 'react-router'
+import { hashHistory } from 'react-router'
 
 export const LoginContainer = React.createClass({
   getInitialState: function() {
@@ -19,7 +19,7 @@ export const LoginContainer = React.createClass({
     console.log(refs.email.value)
     api.renderApp().then(()=>{
       api.login()
-      browserHistory.push('/home')
+      hashHistory.push('/home')
     })
   },
   render: function() {
