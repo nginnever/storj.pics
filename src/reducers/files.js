@@ -6,10 +6,8 @@ function setState(state, newState) {
 
 export default function(state = Map(), action) {
 	switch (action.type) {
-	case 'GET_FILES':
-	  return setState(state, action.user)
-	case 'GET_ONLINE':
-	  return setState(state, action.online)
+	case 'GET_PICTURES':
+	  return setState(state, action.pictures)
 	}
 
 	return state

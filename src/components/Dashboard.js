@@ -6,21 +6,13 @@ export const Dashboard = React.createClass({
   mixins: [PureRenderMixin],
 	render: function() {
 		return(
+      <div className="pane-sm sidebar">
 			<nav className="nav-group">
-			  <h5 className="nav-group-title">Dashboard</h5>
-			  <Link to={'/'} className={this.props.login} onClick={() => this.props.setActive('login')}>
-			    <span className="icon icon-user"></span>
-			    New Account
-			  </Link>
-			  <Link to={'/files'} className={this.props.file} onClick={() => this.props.setActive('file')}>
-			    <span className="icon icon-folder"></span>
-			    Assets
-			  </Link>
-			  <Link to={'/account'} className={this.props.account} onClick={() => this.props.setActive('account')}>
-			    <span className="icon icon-book"></span>
-			    Account Stats
-			  </Link>
+			  <h1 className="nav-group-title" style={{fontSize:14}}>Photo Buckets
+			  <span className="icon icon-plus-squared" style={{marginLeft:10}} onClick={() => this.props.createBucket()}></span></h1> 
+			  {this.props.bucketRows}
 			</nav>
+			</div>
 		)
 	}
 })

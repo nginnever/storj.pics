@@ -7,10 +7,14 @@ import { createStore, applyMiddleware, combineReducers } from 'redux'
 // App Reducers
 import account from './reducers/account'
 import files from './reducers/files'
+import buckets from './reducers/buckets'
+import app from './reducers/app'
 
 const reducers = combineReducers({
   accountReducer: account,
-  filesReducer: files
+  filesReducer: files,
+  bucketsReducer: buckets,
+  appReducer: app
   // more
 })
 

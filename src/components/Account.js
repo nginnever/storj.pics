@@ -5,7 +5,7 @@ export const Account = React.createClass({
   mixins: [PureRenderMixin],
 	render: function() {
 		return(
-			<h1 className="seedcenter"> Coming Soon! </h1>
+			<h1 className="seedcenter"> Welcome to Storj Pics!! </h1>
 		)
 	}
 })

@@ -57,7 +57,7 @@ export const Files = React.createClass({
 	        <table className="table-striped-files">
 	          <thead>
 	            <tr>
-			      <th style={{width: 70}}>IPFS Multihash</th>
+			      <th style={{width: 60}}>IPFS Multihash</th>
 			      <th style={{width: 110}}>Asset File Name</th>
 			      <th style={{width: 150}}>Beneficiary ID</th>
 			    </tr>

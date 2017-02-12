@@ -19,11 +19,11 @@ $blue: blue;
 // --------------------------------------------------
 
 // Main colors
-$primary-color: #3b99fc !default;
+$primary-color: #848484 !default;
 $chrome-color:  #fff !default;
 
 // Copy
-$gray-color: #333 !default;
+$gray-color: #848484 !default;
 
 // Borders
 $border-color: #ddd !default;
@@ -41,7 +41,7 @@ $warning-color: #fdbc40 !default;
 $dark-color: #57acf5 !default;
 
 // Focus and active colors
-$active-color: #116cd6;
+$active-color: #848484;
 $focus-input-color: lighten($primary-color, 10%)  !default;
 
 // Other
@@ -55,3 +55,7 @@ $padding: 10px;
 $padding-mini: 3px;
 $padding-less: 5px;
 $padding-more: 20px;
+
+body {
+    color: red;
+}

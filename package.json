@@ -1,7 +1,7 @@
 {
-  "name": "justwillit",
+  "name": "storj-pics",
   "version": "0.0.1",
-  "description": "distributed asset platform",
+  "description": "decentralized image storage platform",
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/.bin/electron .",
