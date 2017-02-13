@@ -16,11 +16,19 @@ export const LoginContainer = React.createClass({
   },
   login: function(refs, evt) {
     evt.preventDefault()
-    console.log(refs.email.value)
-    api.renderApp().then(()=>{
-      api.login()
+    var options = {
+      email: refs.email.value,
+      pass: refs.pass.value,
+      key: refs.key.value
+    }
+
+      api.login(options).then(() => {
+        api.renderApp()
+      }).catch((err) => {
+        alert(err)
+        hashHistory.push('/')
+      })
       hashHistory.push('/home')
-    })
   },
   render: function() {
     return (

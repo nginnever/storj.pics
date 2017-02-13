@@ -11,15 +11,22 @@ const through2 = require('through2')
 const Buffer = require('buffer/').Buffer
 const fileReaderStream = require('filereader-stream')
 const concat = require('concat-stream')
-const CHUNK_SIZE = 262144
+//const Storj = require('./../../node_modules/storj-js/lib/index.js')
+
 // import lightwallet from 'eth-lightwallet'
 // import web3hook from 'hooked-web3-provider'
 
+var CLIENT = {
+  bridge: 'http://localhost:8080',
+  // basicAuth: {
+  //   email: 'email',
+  //   password: 'pass'
+  // }
+  key: '1b91d8dc6d69c8debc34f9324c5054b9c2a73fba7884fae8dd163bc3be099514'
+};
 
 // window interval for seeding challenges
-var intervalID
-var intervalID2
-var stopSeed
+let storj
 //let ipfs
 // import {createDaemon} from '../utils/ipfs'
 
@@ -31,6 +38,11 @@ function hex_to_ascii(str1) {
     str += String.fromCharCode(parseInt(hex.substr(n, 2), 16))
   }
   return str
+}
+
+function initClient(cb) {
+  storj = new Storj(CLIENT)
+  cb(null, "success")
 }
 
   // send the hex of the chunk to the contract
@@ -46,21 +58,37 @@ export const renderApp = () => {
       type: 'RENDER',
       showApp: {showApp: true}
     })
-    resolve()
+    getBuckets().then(() => {
+      resolve()
+    }).catch((err) => {
+      reject(err)
+    })
   })
 }
 
 // ACCOUNT API
-export const login = () => {
+export const login = (options) => {
   return new Promise((resolve, reject) => {
-    //web3 = setWeb3()
-    // const balance = web3.fromWei(web3.eth.getBalance(web3.eth.accounts[num]))
-    // store.dispatch({
-    //   type: 'GET_BALANCE',
-    //   balance: { balance: balance.c }
-    // })
-    getBuckets().then(() => {
-      resolve('balance')
+    console.log('-----')
+    console.log(options)
+
+    // if(options.key) {
+    //   CLIENT.key = options.key
+    // } else {
+    //   if(options.email && options.pass) {
+    //     var cred = {
+    //       email: options.email,
+    //       password: options.pass
+    //     }
+    //     CLIENT.basicAuth = cred
+    //   } else {
+    //     reject('Invalid Authentication')
+    //   }
+    // }
+
+    initClient((err, res) => {
+      if (err) {reject(err)}
+      resolve(res)
     })
   })
 }
@@ -69,50 +97,55 @@ export const login = () => {
 export const getBuckets = () => {
   return new Promise((resolve, reject) => {
     // get buckets 
-    var buckets = []
-    var bucket = {
-      id: '77845a36aadcb966fc76d5da',
-      it: 1
-    }
-    var bucket2 = {
-      id: '24213949f1400a77cfcbd287',
-      it: 1
-    }
-
-    buckets.push(bucket)
-    buckets.push(bucket2)
-
-    store.dispatch({
-      type: 'GET_BUCKETS',
-      buckets: {buckets: buckets}
+    storj.getBuckets((err, res) => {
+      if(err){
+        reject(err)
+      }
+      store.dispatch({
+        type: 'GET_BUCKETS',
+        buckets: {buckets: res}
+      })
+      resolve()
     })
-    resolve()
   })
 }
 
-export const getFiles = () => {
+export const getFiles = (id) => {
   return new Promise((resolve, reject) => {
-    var pictures = []
-    var pic = {
-      size: 430,
-      name: 'test.jpg',
-      id: '24213949f1400a77cfcbd287'
-    }
+    console.log(id)
+    storj.getBucket(id, (err,res) => {
+      console.log('FILES!!!')
+      console.log(res)
+      var pictures = []
 
-    var pic2 = {
-      size: 430,
-      name: 'test.jpg',
-      id: '24213949f1400a77cfcbd287'
-    }
+      for(var i =0; i < res.files.length; i++) {
+        //console.log(res.files[i].filename)
+        pictures.push({
+          id: res.files[i].id,
+          filename: res.files[i].filename,
+          size: res.files[i].size
+        })
+      }
+      // var pic = {
+      //   size: 430,
+      //   name: 'test.jpg',
+      //   id: '24213949f1400a77cfcbd287'
+      // }
 
-    pictures.push(pic)
-    pictures.push(pic2)
-    store.dispatch({
-      type: 'GET_PICTURES',
-      pictures: {pictures: pictures}
+      // var pic2 = {
+      //   size: 430,
+      //   name: 'test.jpg',
+      //   id: '24213949f1400a77cfcbd287'
+      // }
+
+      // pictures.push(pic)
+      // pictures.push(pic2)
+      store.dispatch({
+        type: 'GET_PICTURES',
+        pictures: {pictures: pictures}
+      })
+      resolve()
     })
-    resolve()
-
   })
 }
 

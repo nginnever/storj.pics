@@ -4,6 +4,9 @@ import {store} from '../store'
 import React from 'react'
 import {Dashboard} from '../components/Dashboard'
 import {Link} from 'react-router'
+import {api} from '../services'
+
+var bucketIds = []
 
 export const DashboardContainer = React.createClass({
 	getInitialState: function() {
@@ -33,14 +36,13 @@ export const DashboardContainer = React.createClass({
       console.log(currentStore.bucketsReducer.toJSON())
       for(var i = 0; i < currentStore.bucketsReducer.toJSON().buckets.length; i++) {
        rand = Math.floor(Math.random()*100000000000000000)
-       var bucketId = currentStore.bucketsReducer.toJSON().buckets[i].id
-       _this.setState({
-         [bucketId]: 'nav-group-item'
-       })
+       console.log('%%%%%%%%')
+       bucketIds.push(currentStore.bucketsReducer.toJSON().buckets[i].id)
+       console.log(bucketIds[i])
        buckets.push(
-        <Link to={'/buckets/'+bucketId} className={_this.state.bucketId}  key={rand} onClick={() => _this.setActive(bucketId)}>
+        <Link to={'/buckets/'+bucketIds[i]} className='nav-group-item'  key={rand} onClick={() => _this.setActive()}>
           <span className="icon icon-folder"></span>&nbsp;
-           {bucketId}
+           {bucketIds[i]}
         </Link>
        )
        buckets.push(<br key={Math.floor(Math.random()*100000000000000000)}></br>)
@@ -53,16 +55,7 @@ export const DashboardContainer = React.createClass({
      })
     })
   },
-  setActive: function(selected) {
-  	if (selected === this.state.active) {
-      return
-    }
-  	var _this = this
-  	_this.setState({
-  		[selected]: 'nav-group-item active',
-  		[this.state.active]: 'nav-group-item',
-  		active: selected
-  	})
+  setActive: function() {
   },
   createBucket: function() {
     alert('creating new bucket!')

@@ -5,7 +5,9 @@ export const Account = React.createClass({
   mixins: [PureRenderMixin],
 	render: function() {
 		return(
-			<h1 className="seedcenter"> Welcome to Storj Pics!!  {this.props.params.value}</h1>
+			<h1 className="seedcenter"> Welcome to Storj Pics!! 
+       <br/>{this.props.params.value} 
+       <br/>{this.props.params.value2}</h1>
 		)
 	}
 })

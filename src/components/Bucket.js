@@ -8,11 +8,12 @@ export const Bucket = React.createClass({
 
     return(
       <div>
-      <table className="noborder">
+      {this.props.renderPics(this.props.params.value)}
+      <table className="">
         <thead className="bgcolor">
           <tr>
-            <th className="seedcenter" style={{width: 200}}> Upload File</th>
-            <th className="seedcenter" style={{width: 200}}> Make Public</th>
+            <th className="theader" > Upload File</th>
+            <th  className="seedcenter"> Make Public</th>
           </tr>
         </thead>
         <tbody className="bgcolor">
@@ -39,7 +40,6 @@ export const Bucket = React.createClass({
             </tbody>
           </table>
         </div>
-        <h1 className="seedcenter">{this.props.params.value}</h1>
       </div> 
     )
   }
