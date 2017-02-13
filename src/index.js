@@ -8,7 +8,7 @@ import {Provider} from 'react-redux'
 import {Main} from './components/Main'
 import {LoginContainer} from './containers/LoginContainer'
 import {FilesContainer} from './containers/FilesContainer'
-import {AccountContainer} from './containers/AccountContainer'
+import {PublicContainer} from './containers/PublicContainer'
 import {HomeContainer} from './containers/HomeContainer'
 import {BucketContainer} from './containers/BucketContainer'
 import {store} from './store'
@@ -21,7 +21,7 @@ const routes = <Route component={Main}>
   <Route path='/buckets/:value' component={BucketContainer} />
   <Route path='/files' component={FilesContainer} />
   <Route path='/home' component={HomeContainer} />
-  <Route path='/public/:value/files/:value2' component={AccountContainer} />
+  <Route path='/public/:value/files/:value2' component={PublicContainer} />
 </Route>
 
 

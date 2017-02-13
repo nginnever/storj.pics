@@ -7,7 +7,6 @@ import {Link} from 'react-router'
 import {api} from '../services'
 
 var bucketIds = []
-
 export const DashboardContainer = React.createClass({
 	getInitialState: function() {
     // TODO: Make table resizable
@@ -56,6 +55,7 @@ export const DashboardContainer = React.createClass({
     })
   },
   setActive: function() {
+     api.renderApp()
   },
   createBucket: function() {
     alert('creating new bucket!')

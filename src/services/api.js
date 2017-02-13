@@ -17,7 +17,7 @@ const concat = require('concat-stream')
 // import web3hook from 'hooked-web3-provider'
 
 var CLIENT = {
-  bridge: 'http://localhost:8080',
+  bridge: 'https://api.storj.io',
   // basicAuth: {
   //   email: 'email',
   //   password: 'pass'
@@ -63,6 +63,17 @@ export const renderApp = () => {
     }).catch((err) => {
       reject(err)
     })
+  })
+}
+
+export const getData = (v1, v2) => {
+  return new Promise((resolve, reject) => {
+    storj.getData(v1, v2, (err, img) => {
+      if(err){
+        reject(err)
+      }
+      resolve(img)
+    });
   })
 }
 
