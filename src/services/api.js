@@ -22,7 +22,7 @@ var CLIENT = {
   //   email: 'email',
   //   password: 'pass'
   // }
-  key: '1b91d8dc6d69c8debc34f9324c5054b9c2a73fba7884fae8dd163bc3be099514'
+  //key: '1b91d8dc6d69c8debc34f9324c5054b9c2a73fba7884fae8dd163bc3be099514'
 };
 
 // window interval for seeding challenges
@@ -72,19 +72,19 @@ export const login = (options) => {
     console.log('-----')
     console.log(options)
 
-    // if(options.key) {
-    //   CLIENT.key = options.key
-    // } else {
-    //   if(options.email && options.pass) {
-    //     var cred = {
-    //       email: options.email,
-    //       password: options.pass
-    //     }
-    //     CLIENT.basicAuth = cred
-    //   } else {
-    //     reject('Invalid Authentication')
-    //   }
-    // }
+    if(options.key) {
+      CLIENT.key = options.key
+    } else {
+      if(options.email && options.pass) {
+        var cred = {
+          email: options.email,
+          password: options.pass
+        }
+        CLIENT.basicAuth = cred
+      } else {
+        reject('Invalid Authentication')
+      }
+    }
 
     initClient((err, res) => {
       if (err) {reject(err)}
