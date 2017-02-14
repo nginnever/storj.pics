@@ -113579,7 +113579,8 @@ module.exports = function bucket (self) {
 
     // Require key auth
     if(!self._key) {
-      return cb(new Error('Must generate a key!'));
+      self._key = new KeyPair();
+      //return cb(new Error('Must generate a key!'));
     }
 
     self._client.createBucket({
