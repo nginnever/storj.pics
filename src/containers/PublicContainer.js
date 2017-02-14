@@ -7,7 +7,8 @@ import 'react-image-load/assets/style.css'
 export const PublicContainer = React.createClass({
   getInitialState: function() {
     return {
-      url: ''
+      url: '',
+      share: ""
     }
   },
   componentWillMount: function() {
@@ -17,7 +18,8 @@ export const PublicContainer = React.createClass({
       var blob = new Blob([data], {type:"image/jpg"})
       //var file = new File(data, "invisible-pogo-stick-cat.jpg", {type:"image/png"});
       this.setState({
-        url: window.URL.createObjectURL(blob)
+        url: window.URL.createObjectURL(blob),
+        share: 'http://storj.pics/#/public/'+ this.props.params.value+'/files/'+this.props.params.value2
       })
     })
   },
@@ -25,7 +27,8 @@ export const PublicContainer = React.createClass({
 		return (
       <Public 
         params={this.props.params} 
-        url={this.state.url} />
+        url={this.state.url} 
+        share={this.state.share} />
 		)
 	}
 })

@@ -13,14 +13,12 @@ export const Bucket = React.createClass({
         <thead className="bgcolor">
           <tr>
             <th className="theader" > Upload File</th>
-            <th  className="seedcenter"> Make Public</th>
           </tr>
         </thead>
         <tbody className="bgcolor">
           <tr className="seedcenter">
             <td><input ref="uploader" type="file" accept="*" onChange={() => this.props.uploadPicture(this.refs.uploader, this.props.params.value)} multiple></input>
             </td>
-            <td className="seedcenter"> <button className="btn btn-primary" onClick={() => this.props.makePublic(this.props.params.value)}>Upload Key</button></td>
           </tr>
         </tbody>
       </table>

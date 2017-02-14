@@ -132,28 +132,31 @@ export const createBucket = (name) => {
       if(err){
         reject(err)
       }
-      var currentStore = store.getState()
-      var b = currentStore.bucketsReducer.toJSON().buckets
-      console.log(b)
-      b.push(res)
-      console.log(b)
+      storj.bucket.makePublic(res.id, (err,res) => {
+        console.log(res)
+        var currentStore = store.getState()
+        var b = currentStore.bucketsReducer.toJSON().buckets
+        console.log(b)
+        b.push(res)
+        console.log(b)
 
-      store.dispatch({
-        type: 'GET_BUCKETS',
-        buckets: {buckets: b}
+        store.dispatch({
+          type: 'GET_BUCKETS',
+          buckets: {buckets: b}
+        })
+        resolve()
       })
-      resolve()
     })
   })
 }
-export const makePublic = (id, opts) => {
-  return new Promise((resolve, reject) => {
-    storj.bucket.makePublic(id, (err,res) => {
-      console.log(res)
-      resolve(res)
-    })
-  })
-}
+// export const makePublic = (id, opts) => {
+//   return new Promise((resolve, reject) => {
+//     storj.bucket.makePublic(id, (err,res) => {
+//       console.log(res)
+//       resolve(res)
+//     })
+//   })
+// }
 
 export const uploadPicture = (pic, bucketId) => {
   return new Promise((resolve, reject) => {

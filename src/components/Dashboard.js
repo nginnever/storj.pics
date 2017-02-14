@@ -37,7 +37,7 @@ export const Dashboard = React.createClass({
 						  </div>
 						</form>
 			    </Modal>
-			    <div>
+			    <div className="side-scroll">
 			    {this.props.bucketRows}
 			    </div>
 			</nav>

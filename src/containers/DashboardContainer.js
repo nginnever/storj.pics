@@ -81,7 +81,7 @@ export const DashboardContainer = React.createClass({
     e.preventDefault()
     this.closeCreate()
     api.createBucket(refs.name.value).then(() => {
-
+      api.renderApp()
     })
   },
   openCreate: function() {
