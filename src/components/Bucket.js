@@ -18,9 +18,9 @@ export const Bucket = React.createClass({
         </thead>
         <tbody className="bgcolor">
           <tr className="seedcenter">
-            <td><input ref="uploader" type="file" accept="*" onChange={() => this.props.uploadPicture(this.refs.uploader)} multiple></input>
+            <td><input ref="uploader" type="file" accept="*" onChange={() => this.props.uploadPicture(this.refs.uploader, this.props.params.value)} multiple></input>
             </td>
-            <td className="seedcenter"> <button className="btn btn-primary" onClick={() => this.props.makePublic()}>Upload Key</button></td>
+            <td className="seedcenter"> <button className="btn btn-primary" onClick={() => this.props.makePublic(this.props.params.value)}>Upload Key</button></td>
           </tr>
         </tbody>
       </table>

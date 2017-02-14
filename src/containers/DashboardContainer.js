@@ -10,11 +10,39 @@ var bucketIds = []
 export const DashboardContainer = React.createClass({
 	getInitialState: function() {
     // TODO: Make table resizable
+    const customStyles = {
+      overlay: {
+        position          : 'fixed',
+        top               : 0,
+        left              : 0,
+        right             : 0,
+        bottom            : 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.0)'
+      },
+      content: {
+        position                   : 'absolute',
+        height                     : "299px",
+        top                        : '40px',
+        left                       : '240px',
+        right                      : '40px',
+        bottom                     : '40px',
+        border                     : '1px solid #ccc',
+        background                 : '#fff',
+        overflow                   : 'auto',
+        WebkitOverflowScrolling    : 'touch',
+        borderRadius               : '4px',
+        outline                    : 'none',
+        padding                    : '20px',
+        backgound: '#000'
+      }
+    }
 		return {
+      customModalStyles: customStyles,
       bucketRows: [],
       bucketId: '',
 			active: '',
-      it: 0
+      it: 0,
+      isOpenAccounts: false
 		}
 	},
   componentWillMount: function() {
@@ -23,15 +51,7 @@ export const DashboardContainer = React.createClass({
       var currentStore = store.getState()
       let rand
       var buckets = []
-
-      // if (currentStore.bucketsReducer.toJSON().buckets === undefined) {
-      //   return
-      // }
-      // if(currentStore.bucketsReducer.toJSON().buckets[currentStore.bucketsReducer.toJSON().buckets.length].it === _this.state.it) {
-      //   //api.getInitFile(acc, currentStore.filesReducer.toJSON().user)
-      //   return
-      // }
-      //var h = currentStore.filesReducer.toJSON().user[currentStore.accountReducer.toJSON().activeAccount].files[i].hash
+      var bucketIds = []
       console.log(currentStore.bucketsReducer.toJSON())
       for(var i = 0; i < currentStore.bucketsReducer.toJSON().buckets.length; i++) {
        rand = Math.floor(Math.random()*100000000000000000)
@@ -57,8 +77,24 @@ export const DashboardContainer = React.createClass({
   setActive: function() {
      api.renderApp()
   },
-  createBucket: function() {
-    alert('creating new bucket!')
+  createBucket: function(refs, e) {
+    e.preventDefault()
+    this.closeCreate()
+    api.createBucket(refs.name.value).then(() => {
+
+    })
+  },
+  openCreate: function() {
+    var _this = this
+    _this.setState({
+      isOpenAccounts: true
+    })
+  },
+  closeCreate: function() {
+    var _this = this
+    _this.setState({
+      isOpenAccounts: false
+    })
   },
 	render: function() {
 		return (
@@ -66,7 +102,11 @@ export const DashboardContainer = React.createClass({
         bucketId={this.state.bucketId}
         bucketRows={this.state.bucketRows}
         setActive={this.setActive}
-        createBucket = {this.createBucket} />
+        createBucket = {this.createBucket}
+        isOpenAccounts={this.state.isOpenAccounts}
+        closeCreate={this.closeCreate} 
+        customModalStyles={this.state.customModalStyles} 
+        openCreate={this.openCreate} />
 		)
 	}
 })

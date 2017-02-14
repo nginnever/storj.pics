@@ -18,6 +18,7 @@ const concat = require('concat-stream')
 
 var CLIENT = {
   bridge: 'https://api.storj.io',
+  //bridge: 'http://localhost:8080'
   // basicAuth: {
   //   email: 'email',
   //   password: 'pass'
@@ -117,6 +118,58 @@ export const getBuckets = () => {
         buckets: {buckets: res}
       })
       resolve()
+    })
+  })
+}
+
+export const createBucket = (name) => {
+  return new Promise((resolve, reject) => {
+    // get buckets 
+    storj.createBucket(name, (err, res) => {
+      console.log('&&&&&&&&&&&&&&&&')
+      console.log(res)
+      if(err){
+        reject(err)
+      }
+      var currentStore = store.getState()
+      var b = currentStore.bucketsReducer.toJSON().buckets
+      console.log(b)
+      b.push(res)
+      console.log(b)
+
+      store.dispatch({
+        type: 'GET_BUCKETS',
+        buckets: {buckets: b}
+      })
+      resolve()
+    })
+  })
+}
+export const makePublic = (id, opts) => {
+  return new Promise((resolve, reject) => {
+    storj.bucket.makePublic(id, (err,res) => {
+      console.log(res)
+      resolve(res)
+    })
+  })
+}
+
+export const uploadPicture = (pic, bucketId) => {
+  return new Promise((resolve, reject) => {
+    var rs = window.getFileStream(pic);
+    console.log(rs)
+    // storj.uploadData(bucketId, files[0].name, rs, (err, res) => {
+    //   console.log(err)
+    //   console.log(res)
+    // })
+
+    // storj.on('encrypted', ()=>{
+    //   console.log('encrypted')
+    // })
+    storj.uploadData(bucketId, pic[0].name, rs, (err, res) => {
+      console.log(err)
+      console.log(res)
+      resolve(res)
     })
   })
 }

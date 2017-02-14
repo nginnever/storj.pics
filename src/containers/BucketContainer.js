@@ -51,6 +51,7 @@ export const BucketContainer = React.createClass({
   },
   renderPics: function(id){
     console.log('RENDER PICS!!!')
+    console.log(idState)
 
 
     if(id !== idState) {
@@ -62,11 +63,17 @@ export const BucketContainer = React.createClass({
     }
     
   },
-  uploadPicture: function(picture) {
-    alert(picture)
+  uploadPicture: function(picture, id) {
+    console.log(picture.files)
+    api.uploadPicture(picture.files, id).then((res) =>{
+      api.getFiles(id)
+    })
   },
-  makePublic: function() {
-    alert('makePublic')
+  makePublic: function(id) {
+    console.log(id)
+    api.makePublic(id).then((res) => {
+      alert(res)
+    })
   },
   render: function() {
     return (

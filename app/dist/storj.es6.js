@@ -113564,6 +113564,8 @@ module.exports={
 },{}],525:[function(require,module,exports){
 'use strict';
 
+var KeyPair = require('storj-lib/lib/crypto-tools/keypair');
+
 module.exports = function bucket (self) {
   const _internal = function(cb) {
 
@@ -113629,14 +113631,54 @@ module.exports = function bucket (self) {
     * makes a specific storage bucket public, uploading bucket key to bridge
     * @param
   */
-  const makePublic = function(id) {
 
-  };
+  const makePublic = function(id, env, cb) {
+    if(typeof env === 'function') {
+      cb = env;
+      env = {};
+    }
+    var publicPush = env.push ? true : false;
+    var publicPull = env.pull ? true : false;
+
+    publicPull = true
+    publicPush = true
+    var _finish = function(permissions, bucketKey) {
+      self._client.updateBucketById(id, {
+        publicPermissions: permissions,
+        encryptionKey: bucketKey
+      }, function(err, bucket) {
+        if (err) {
+          return log('error', err.message);
+        }
+        var updatedPull = bucket.publicPermissions.includes('PULL');
+        var updatedPush = bucket.publicPermissions.includes('PUSH');
+        var key = bucket.encryptionKey.length === 0 ? null : bucket.encryptionKey;
+        cb(null, [bucket.id, bucket.name, updatedPull, updatedPush, key])
+      });
+    };
+
+    var permissions = [];
+    if (publicPull) {
+      permissions.push('PULL');
+    }
+    if (publicPush) {
+      permissions.push('PUSH');
+    }
+
+    if (permissions.length === 0) {
+      return _finish([], '');
+    }
+
+    //generate randpm key until keyring is implemented
+    var key = new KeyPair();
+    _finish(permissions, key.getPrivateKey());
+
+  }
 
   return { createBucket, getBucket, getBuckets, deleteBucket, makePublic };
 }
 
-},{}],526:[function(require,module,exports){
+},{"storj-lib/lib/crypto-tools/keypair":180}],526:[function(require,module,exports){
 /**
   * @module storj/create-file-token
   * @license LGPL-3.0
@@ -113742,8 +113784,6 @@ module.exports = function(self) {
 
   var initDecryption = function(cb) {
     console.log(self._key.getPrivateKey())
-    console.log(self._file)
-
     var key = KeyIV.getDeterministicKey(self._key.getPrivateKey(), self._file);
     var secret = new KeyIV(key, self._file);
     var decrypter = new DecryptStream(secret);
@@ -113753,6 +113793,7 @@ module.exports = function(self) {
     decrypter.pipe(concatStream)
 
     function gotPicture(img) {
+      console.log(img)
       if(cb){
         return cb(null, img);
       }
@@ -113814,7 +113855,7 @@ module.exports = function(self) {
   }
 }
 
-},{"concat-stream":540,"storj-lib/lib/crypto-tools/decrypt-stream.js":177,"storj-lib/lib/crypto-tools/deterministic-key-iv.js":178,"storj-lib/lib/crypto-tools/keypair.js":180,"storj-lib/lib/utils.js":184}],529:[function(require,module,exports){
+},{"concat-stream":541,"storj-lib/lib/crypto-tools/decrypt-stream.js":177,"storj-lib/lib/crypto-tools/deterministic-key-iv.js":178,"storj-lib/lib/crypto-tools/keypair.js":180,"storj-lib/lib/utils.js":184}],529:[function(require,module,exports){
 /**
   * @module storj/get-file-pointers
   * @license LGPL-3.0
@@ -113903,10 +113944,57 @@ module.exports = function(self) {
   }
 }
 },{}],531:[function(require,module,exports){
+/**
+  * @module storj/get-keypair
+  * @license LGPL-3.0
+  */
+
+'use strict';
+
+var KeyPair = require('storj-lib/lib/crypto-tools/keypair');
+
+module.exports = function(self) {
+  // TODO: implement
+  /**
+    * Conveinence function for emitting an error. If there is a registered
+    * listener on the File, then we will emit there, otherwise we will attempt to
+    * emit on the client. If there is not a client, we throw the error. Client may
+    * throw an unhandled error event exception if no listeners are registered.
+    * @private
+   */
+  var _error = function (e) {
+    // if(this.listenerCount('error') > 0) {
+    //   return this.emit('error', e);
+    // }
+    // if(self._client) {
+    //   return self._client.emit('error', e);
+    // }
+    throw e;
+  };
+  /*
+   * Create new keypair
+   * @param key (String) The private key to genereate the keypair
+   * @param callback
+  */
+  return function(key, cb)  {
+    // if no private key is supplied, a random one will be generated.
+    var key = new KeyPair(key);
+    self._key = key;
+    self._pubKey = key.getPublicKey();
+    self._encryptionKey = key.getPrivateKey();
+    if(cb === undefined) { return key };
+
+    return cb(key);
+
+  }
+}
+
+},{"storj-lib/lib/crypto-tools/keypair":180}],532:[function(require,module,exports){
 exports.bucket = require('./bucket.js');
 exports.uploadData = require('./upload-data.js');
 exports.getData = require('./get-data.js');
 exports.getFile = require('./get-file.js');
+exports.getKeypair = require('./get-keypair.js');
 exports.createFile = require('./create-file.js');
 exports.createFileToken = require('./create-file-token.js');
 exports.getFilePointers = require('./get-file-pointers');
@@ -113914,7 +114002,7 @@ exports.resolveFileFromPointers = require('./resolve-file-from-pointers.js');
 exports.registerKey = require('./register-key.js');
 
 
-},{"./bucket.js":525,"./create-file-token.js":526,"./create-file.js":527,"./get-data.js":528,"./get-file-pointers":529,"./get-file.js":530,"./register-key.js":532,"./resolve-file-from-pointers.js":533,"./upload-data.js":534}],532:[function(require,module,exports){
+},{"./bucket.js":525,"./create-file-token.js":526,"./create-file.js":527,"./get-data.js":528,"./get-file-pointers":529,"./get-file.js":530,"./get-keypair.js":531,"./register-key.js":533,"./resolve-file-from-pointers.js":534,"./upload-data.js":535}],533:[function(require,module,exports){
 /**
   * @module storj/get-keypair
   * @license LGPL-3.0
@@ -113963,7 +114051,7 @@ module.exports = function(self) {
   }
 }
 
-},{"storj-lib/lib/crypto-tools/keypair.js":180}],533:[function(require,module,exports){
+},{"storj-lib/lib/crypto-tools/keypair.js":180}],534:[function(require,module,exports){
 /**
   * @module storj/resolve-file-from-pointers
   * @license LGPL-3.0
@@ -114000,7 +114088,7 @@ module.exports = function(self) {
   }
 }
 
-},{}],534:[function(require,module,exports){
+},{}],535:[function(require,module,exports){
 /**
   * @module storj/uploadData
   * @license LGPL-3.0
@@ -114053,7 +114141,7 @@ module.exports = function(self) {
 
       if(token.encryptionKey !== '') {
         //self._key = new KeyPair(token.encryptionKey);
-        self._key = token.encryptionKey;
+        self._key = new KeyPair(token.encryptionKey);
       } else {
         if(self._key === undefined) {
           self.emit('error', new Error('You must supply an encryption key to upload to private buckets.'));
@@ -114104,7 +114192,7 @@ module.exports = function(self) {
   }
 }
 
-},{"crypto":58,"memory-blob-store":551,"storj-lib/lib/crypto-tools/deterministic-key-iv.js":178,"storj-lib/lib/crypto-tools/encrypt-stream.js":179,"storj-lib/lib/crypto-tools/keypair.js":180,"storj-lib/lib/utils.js":184,"util":167}],535:[function(require,module,exports){
+},{"crypto":58,"memory-blob-store":552,"storj-lib/lib/crypto-tools/deterministic-key-iv.js":178,"storj-lib/lib/crypto-tools/encrypt-stream.js":179,"storj-lib/lib/crypto-tools/keypair.js":180,"storj-lib/lib/utils.js":184,"util":167}],536:[function(require,module,exports){
 /**
  * @module storj/file
  * @license LGPL-3.0
@@ -114457,7 +114545,7 @@ File.prototype.getBlobUrl = function getBlobUrl(cb) {
 // Export the File class
 module.exports = File;
 
-},{"assert":15,"concat-stream":540,"crypto":58,"events":86,"from2":546,"render-media":571,"storj-lib/lib/bridge-client":173,"storj-lib/lib/crypto-tools/decrypt-stream.js":177,"storj-lib/lib/crypto-tools/deterministic-key-iv.js":178,"storj-lib/lib/crypto-tools/encrypt-stream.js":179,"storj-lib/lib/crypto-tools/keypair.js":180,"storj-lib/lib/utils":184,"storj-lib/lib/utils.js":184,"stream-to-blob":575,"stream-to-blob-url":574,"util":167}],536:[function(require,module,exports){
+},{"assert":15,"concat-stream":541,"crypto":58,"events":86,"from2":547,"render-media":572,"storj-lib/lib/bridge-client":173,"storj-lib/lib/crypto-tools/decrypt-stream.js":177,"storj-lib/lib/crypto-tools/deterministic-key-iv.js":178,"storj-lib/lib/crypto-tools/encrypt-stream.js":179,"storj-lib/lib/crypto-tools/keypair.js":180,"storj-lib/lib/utils":184,"storj-lib/lib/utils.js":184,"stream-to-blob":576,"stream-to-blob-url":575,"util":167}],537:[function(require,module,exports){
 'use strict'
 
 // Use bridge client for now
@@ -114523,6 +114611,7 @@ function setupAlias(self) {
   self.uploadData = api.uploadData(self);
   self.getData = api.getData(self);
   self.getFile = api.getFile(self);
+  self.getKeypair = api.getKeypair(self);
   self.createFile = api.createFile(self);
   self.createFileToken = api.createFileToken(self);
   self.getFilePointers = api.getFilePointers(self);
@@ -114589,7 +114678,7 @@ util.inherits(Storj, EventEmitter);
 
 module.exports = Storj;
 
-},{"./api":531,"./file.js":535,"assert":15,"events":86,"memory-blob-store":551,"storj-lib/lib/bridge-client":173,"storj-lib/lib/crypto-tools/keypair.js":180,"util":167}],537:[function(require,module,exports){
+},{"./api":532,"./file.js":536,"assert":15,"events":86,"memory-blob-store":552,"storj-lib/lib/bridge-client":173,"storj-lib/lib/crypto-tools/keypair.js":180,"util":167}],538:[function(require,module,exports){
 'use strict';
 
 require('setimmediate')
@@ -114599,7 +114688,7 @@ self.Storj.DEFAULTS.store = new (require('memory-blob-store'))();
 
 exports = module.exports = Storj
 
-},{"./core":536,"memory-blob-store":551,"setimmediate":573}],538:[function(require,module,exports){
+},{"./core":537,"memory-blob-store":552,"setimmediate":574}],539:[function(require,module,exports){
 module.exports = function(haystack, needle, comparator, low, high) {
   var mid, cmp;
 
@@ -114644,11 +114733,11 @@ module.exports = function(haystack, needle, comparator, low, high) {
   return ~low;
 }
 
-},{}],539:[function(require,module,exports){
+},{}],540:[function(require,module,exports){
 arguments[4][47][0].apply(exports,arguments)
-},{"buffer":49,"dup":47}],540:[function(require,module,exports){
+},{"buffer":49,"dup":47}],541:[function(require,module,exports){
 arguments[4][300][0].apply(exports,arguments)
-},{"buffer":49,"dup":300,"inherits":547,"readable-stream":570,"typedarray":578}],541:[function(require,module,exports){
+},{"buffer":49,"dup":300,"inherits":548,"readable-stream":571,"typedarray":579}],542:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -114759,7 +114848,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../../../../../.nvm/versions/node/v6.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js")})
-},{"../../../../../../.nvm/versions/node/v6.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":98}],542:[function(require,module,exports){
+},{"../../../../../../.nvm/versions/node/v6.9.1/lib/node_modules/watchify/node_modules/is-buffer/index.js":98}],543:[function(require,module,exports){
 (function (process){
 /**
  * This is the web browser implementation of `debug()`.
@@ -114945,7 +115034,7 @@ function localstorage() {
 }
 
 }).call(this,require('_process'))
-},{"./debug":543,"_process":122}],543:[function(require,module,exports){
+},{"./debug":544,"_process":122}],544:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -115146,11 +115235,11 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":558}],544:[function(require,module,exports){
+},{"ms":559}],545:[function(require,module,exports){
 arguments[4][329][0].apply(exports,arguments)
-},{"dup":329,"once":545}],545:[function(require,module,exports){
+},{"dup":329,"once":546}],546:[function(require,module,exports){
 arguments[4][308][0].apply(exports,arguments)
-},{"dup":308,"wrappy":583}],546:[function(require,module,exports){
+},{"dup":308,"wrappy":584}],547:[function(require,module,exports){
 (function (process){
 var Readable = require('readable-stream').Readable
 var inherits = require('inherits')
@@ -115257,9 +115346,9 @@ function defaults(opts) {
 }
 
 }).call(this,require('_process'))
-},{"_process":122,"inherits":547,"readable-stream":570}],547:[function(require,module,exports){
+},{"_process":122,"inherits":548,"readable-stream":571}],548:[function(require,module,exports){
 arguments[4][97][0].apply(exports,arguments)
-},{"dup":97}],548:[function(require,module,exports){
+},{"dup":97}],549:[function(require,module,exports){
 /* (c) 2016 Ari Porad (@ariporad) <http://ariporad.com>. License: ariporad.mit-license.org */
 
 // Partially from http://stackoverflow.com/a/94049/1928484, and from another SO answer, which told me that the highest
@@ -115274,9 +115363,9 @@ module.exports = function isAscii(str) {
   return true;
 };
 
-},{}],549:[function(require,module,exports){
+},{}],550:[function(require,module,exports){
 arguments[4][99][0].apply(exports,arguments)
-},{"dup":99}],550:[function(require,module,exports){
+},{"dup":99}],551:[function(require,module,exports){
 module.exports = MediaElementWrapper
 
 var inherits = require('inherits')
@@ -115523,7 +115612,7 @@ MediaSourceStream.prototype._getBufferDuration = function () {
   return bufferedTime
 }
 
-},{"inherits":547,"readable-stream":570,"to-arraybuffer":577}],551:[function(require,module,exports){
+},{"inherits":548,"readable-stream":571,"to-arraybuffer":578}],552:[function(require,module,exports){
 (function (Buffer){
 const stream = require('stream');
 const timers = require('timers');
@@ -115669,7 +115758,7 @@ MemoryBlobStore.prototype.exists = exists;
 module.exports = MemoryBlobStore;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":49,"stream":154,"timers":160}],552:[function(require,module,exports){
+},{"buffer":49,"stream":154,"timers":160}],553:[function(require,module,exports){
 (function (Buffer){
 // This is an intentionally recursive require. I don't like it either.
 var Box = require('./index')
@@ -116602,7 +116691,7 @@ function readString (buf, offset, length) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./descriptor":553,"./index":554,"buffer":49}],553:[function(require,module,exports){
+},{"./descriptor":554,"./index":555,"buffer":49}],554:[function(require,module,exports){
 (function (Buffer){
 var tagToName = {
   0x03: 'ESDescriptor',
@@ -116678,7 +116767,7 @@ exports.DecoderConfigDescriptor.decode = function (buf, start, end) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":49}],554:[function(require,module,exports){
+},{"buffer":49}],555:[function(require,module,exports){
 (function (Buffer){
 // var assert = require('assert')
 var uint64be = require('uint64be')
@@ -116907,7 +116996,7 @@ Box.encodingLength = function (obj) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./boxes":552,"buffer":49,"uint64be":579}],555:[function(require,module,exports){
+},{"./boxes":553,"buffer":49,"uint64be":580}],556:[function(require,module,exports){
 (function (Buffer){
 var stream = require('readable-stream')
 var inherits = require('inherits')
@@ -117096,7 +117185,7 @@ MediaData.prototype.destroy = function (err) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":49,"inherits":547,"mp4-box-encoding":554,"next-event":559,"readable-stream":570}],556:[function(require,module,exports){
+},{"buffer":49,"inherits":548,"mp4-box-encoding":555,"next-event":560,"readable-stream":571}],557:[function(require,module,exports){
 (function (process,Buffer){
 var stream = require('readable-stream')
 var inherits = require('inherits')
@@ -117230,13 +117319,13 @@ MediaData.prototype.destroy = function (err) {
 }
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":122,"buffer":49,"inherits":547,"mp4-box-encoding":554,"readable-stream":570}],557:[function(require,module,exports){
+},{"_process":122,"buffer":49,"inherits":548,"mp4-box-encoding":555,"readable-stream":571}],558:[function(require,module,exports){
 exports.decode = require('./decode')
 exports.encode = require('./encode')
 
-},{"./decode":555,"./encode":556}],558:[function(require,module,exports){
+},{"./decode":556,"./encode":557}],559:[function(require,module,exports){
 arguments[4][427][0].apply(exports,arguments)
-},{"dup":427}],559:[function(require,module,exports){
+},{"dup":427}],560:[function(require,module,exports){
 module.exports = nextEvent
 
 function nextEvent (emitter, name) {
@@ -117253,11 +117342,11 @@ function nextEvent (emitter, name) {
   }
 }
 
-},{}],560:[function(require,module,exports){
+},{}],561:[function(require,module,exports){
 arguments[4][433][0].apply(exports,arguments)
-},{"dup":433,"wrappy":583}],561:[function(require,module,exports){
+},{"dup":433,"wrappy":584}],562:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
-},{"_process":122,"dup":121}],562:[function(require,module,exports){
+},{"_process":122,"dup":121}],563:[function(require,module,exports){
 var once = require('once')
 var eos = require('end-of-stream')
 var fs = require('fs') // we only need fs to get the ReadStream and WriteStream prototypes
@@ -117339,7 +117428,7 @@ var pump = function () {
 
 module.exports = pump
 
-},{"end-of-stream":544,"fs":19,"once":560}],563:[function(require,module,exports){
+},{"end-of-stream":545,"fs":19,"once":561}],564:[function(require,module,exports){
 /*
 Instance of writable stream.
 
@@ -117466,21 +117555,21 @@ RangeSliceStream.prototype.destroy = function (err) {
 	if (err) self.emit('error', err)
 }
 
-},{"inherits":547,"readable-stream":570}],564:[function(require,module,exports){
+},{"inherits":548,"readable-stream":571}],565:[function(require,module,exports){
 arguments[4][135][0].apply(exports,arguments)
-},{"./_stream_readable":566,"./_stream_writable":568,"core-util-is":541,"dup":135,"inherits":547,"process-nextick-args":561}],565:[function(require,module,exports){
+},{"./_stream_readable":567,"./_stream_writable":569,"core-util-is":542,"dup":135,"inherits":548,"process-nextick-args":562}],566:[function(require,module,exports){
 arguments[4][136][0].apply(exports,arguments)
-},{"./_stream_transform":567,"core-util-is":541,"dup":136,"inherits":547}],566:[function(require,module,exports){
+},{"./_stream_transform":568,"core-util-is":542,"dup":136,"inherits":548}],567:[function(require,module,exports){
 arguments[4][137][0].apply(exports,arguments)
-},{"./_stream_duplex":564,"./internal/streams/BufferList":569,"_process":122,"buffer":49,"buffer-shims":539,"core-util-is":541,"dup":137,"events":86,"inherits":547,"isarray":549,"process-nextick-args":561,"string_decoder/":576,"util":19}],567:[function(require,module,exports){
+},{"./_stream_duplex":565,"./internal/streams/BufferList":570,"_process":122,"buffer":49,"buffer-shims":540,"core-util-is":542,"dup":137,"events":86,"inherits":548,"isarray":550,"process-nextick-args":562,"string_decoder/":577,"util":19}],568:[function(require,module,exports){
 arguments[4][138][0].apply(exports,arguments)
-},{"./_stream_duplex":564,"core-util-is":541,"dup":138,"inherits":547}],568:[function(require,module,exports){
+},{"./_stream_duplex":565,"core-util-is":542,"dup":138,"inherits":548}],569:[function(require,module,exports){
 arguments[4][139][0].apply(exports,arguments)
-},{"./_stream_duplex":564,"_process":122,"buffer":49,"buffer-shims":539,"core-util-is":541,"dup":139,"events":86,"inherits":547,"process-nextick-args":561,"util-deprecate":580}],569:[function(require,module,exports){
+},{"./_stream_duplex":565,"_process":122,"buffer":49,"buffer-shims":540,"core-util-is":542,"dup":139,"events":86,"inherits":548,"process-nextick-args":562,"util-deprecate":581}],570:[function(require,module,exports){
 arguments[4][140][0].apply(exports,arguments)
-},{"buffer":49,"buffer-shims":539,"dup":140}],570:[function(require,module,exports){
+},{"buffer":49,"buffer-shims":540,"dup":140}],571:[function(require,module,exports){
 arguments[4][142][0].apply(exports,arguments)
-},{"./lib/_stream_duplex.js":564,"./lib/_stream_passthrough.js":565,"./lib/_stream_readable.js":566,"./lib/_stream_transform.js":567,"./lib/_stream_writable.js":568,"_process":122,"dup":142}],571:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":565,"./lib/_stream_passthrough.js":566,"./lib/_stream_readable.js":567,"./lib/_stream_transform.js":568,"./lib/_stream_writable.js":569,"_process":122,"dup":142}],572:[function(require,module,exports){
 exports.render = render
 exports.append = append
 exports.mime = require('./lib/mime.json')
@@ -117831,7 +117920,7 @@ function parseOpts (opts) {
   if (opts.maxBlobLength == null) opts.maxBlobLength = MAX_BLOB_LENGTH
 }
 
-},{"./lib/mime.json":572,"debug":542,"is-ascii":548,"mediasource":550,"path":118,"stream-to-blob-url":574,"videostream":582}],572:[function(require,module,exports){
+},{"./lib/mime.json":573,"debug":543,"is-ascii":549,"mediasource":551,"path":118,"stream-to-blob-url":575,"videostream":583}],573:[function(require,module,exports){
 module.exports={
   ".3gp": "video/3gpp",
   ".aac": "audio/aac",
@@ -117914,7 +118003,7 @@ module.exports={
   ".zip": "application/zip"
 }
 
-},{}],573:[function(require,module,exports){
+},{}],574:[function(require,module,exports){
 (function (process,global){
 (function (global, undefined) {
     "use strict";
@@ -118104,7 +118193,7 @@ module.exports={
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":122}],574:[function(require,module,exports){
+},{"_process":122}],575:[function(require,module,exports){
 /* global URL */
 
 var getBlob = require('stream-to-blob')
@@ -118118,7 +118207,7 @@ module.exports = function getBlobURL (stream, mimeType, cb) {
   })
 }
 
-},{"stream-to-blob":575}],575:[function(require,module,exports){
+},{"stream-to-blob":576}],576:[function(require,module,exports){
 /* global Blob */
 
 var once = require('once')
@@ -118140,13 +118229,13 @@ module.exports = function getBlob (stream, mimeType, cb) {
     .on('error', cb)
 }
 
-},{"once":560}],576:[function(require,module,exports){
+},{"once":561}],577:[function(require,module,exports){
 arguments[4][159][0].apply(exports,arguments)
-},{"buffer":49,"dup":159}],577:[function(require,module,exports){
+},{"buffer":49,"dup":159}],578:[function(require,module,exports){
 arguments[4][161][0].apply(exports,arguments)
-},{"buffer":49,"dup":161}],578:[function(require,module,exports){
+},{"buffer":49,"dup":161}],579:[function(require,module,exports){
 arguments[4][519][0].apply(exports,arguments)
-},{"dup":519}],579:[function(require,module,exports){
+},{"dup":519}],580:[function(require,module,exports){
 (function (Buffer){
 var UINT_32_MAX = 0xffffffff
 
@@ -118182,9 +118271,9 @@ exports.encode.bytes = 8
 exports.decode.bytes = 8
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":49}],580:[function(require,module,exports){
+},{"buffer":49}],581:[function(require,module,exports){
 arguments[4][164][0].apply(exports,arguments)
-},{"dup":164}],581:[function(require,module,exports){
+},{"dup":164}],582:[function(require,module,exports){
 (function (Buffer){
 var bs = require('binary-search')
 var EventEmitter = require('events').EventEmitter
@@ -118659,7 +118748,7 @@ MP4Remuxer.prototype._generateMoof = function (track, firstSample, lastSample) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"binary-search":538,"buffer":49,"events":86,"inherits":547,"mp4-box-encoding":554,"mp4-stream":557,"range-slice-stream":563}],582:[function(require,module,exports){
+},{"binary-search":539,"buffer":49,"events":86,"inherits":548,"mp4-box-encoding":555,"mp4-stream":558,"range-slice-stream":564}],583:[function(require,module,exports){
 var MediaElementWrapper = require('mediasource')
 var pump = require('pump')
 
@@ -118784,7 +118873,7 @@ VideoStream.prototype.destroy = function () {
 	self._elem.src = ''
 }
 
-},{"./mp4-remuxer":581,"mediasource":550,"pump":562}],583:[function(require,module,exports){
+},{"./mp4-remuxer":582,"mediasource":551,"pump":563}],584:[function(require,module,exports){
 arguments[4][522][0].apply(exports,arguments)
-},{"dup":522}]},{},[537])(537)
+},{"dup":522}]},{},[538])(538)
 });
