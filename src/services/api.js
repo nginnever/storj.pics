@@ -41,9 +41,8 @@ function hex_to_ascii(str1) {
   return str
 }
 
-function initClient(cb) {
+function initClient() {
   storj = new Storj(CLIENT)
-  cb(null, "success")
 }
 
   // send the hex of the chunk to the contract
@@ -69,6 +68,10 @@ export const renderApp = () => {
 
 export const getData = (v1, v2) => {
   return new Promise((resolve, reject) => {
+    if(storj === undefined) {
+      initClient()
+    }
+    console.log(storj)
     storj.getData(v1, v2, (err, img) => {
       if(err){
         reject(err)
@@ -98,10 +101,8 @@ export const login = (options) => {
       }
     }
 
-    initClient((err, res) => {
-      if (err) {reject(err)}
-      resolve(res)
-    })
+    initClient()
+    resolve()
   })
 }
 
